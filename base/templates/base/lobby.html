@@ -1,0 +1,76 @@
+{% extends 'base/main.html' %} {% load static %} {% block content %}
+<main>
+  <section id="form-container">
+    <img id="logo" src="{% static 'images/andromeda_1.png' %}" />
+
+    <div id="welcome-message">
+      <h1>
+        <span style="font-family: 'Sedgwick Ave', cursive; text-decoration: underline"
+          >Welcome to Andromeda</span
+        >
+      </h1>
+      <!--<p>A group video calling Galaxy made just for you!</p>-->
+    </div>
+
+    <form id="form">
+      <div class="field-wrapper">
+        <div class="form-field">
+          <label>Room:</label>
+          <input
+            name="room"
+            placeholder="Enter a room name..."
+            style="text-transform: uppercase"
+            required="true"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Name:</label>
+          <input
+            name="name"
+            placeholder="Enter your name..."
+            style="text-transform: uppercase"
+            required="true"
+          />
+        </div>
+
+        <div class="form-field">
+          <input type="submit" value="Join Stream" />
+        </div>
+      </div>
+    </form>
+  </section>
+</main>
+<script type="text/javascript">
+  let form = document.getElementById("form");
+  //to handle the form and also to prevent other html to load.
+  let handleSubmit = async (e) => {
+    e.preventDefault();
+
+    //Now get the response from the getToken in views.py file and set a session with UID, Room and token
+
+    //first get the room name entered by the user. It will be your channel name
+    let room = e.target.room.value.toUpperCase();
+    let name = e.target.name.value;
+    console.log("Room Name =>" + room);
+
+    //now call the get_token function using fetch(){like an API} => use await to wait for all the processing
+    let response = await fetch(`/get_token/?channel=${room}`);
+    //convert to json
+    let dataJson = await response.json();
+    //dataJson will have => uid and token
+    let UID = dataJson.uid;
+    let TOKEN = dataJson.token;
+    //create a seesion with UID,TOKEN,Channel
+    sessionStorage.setItem("UID", UID);
+    sessionStorage.setItem("TOKEN", TOKEN);
+    sessionStorage.setItem("CHANNEL", room);
+    sessionStorage.setItem("NAME", name);
+
+    //send to the room
+    window.open("/room/", "_self");
+  };
+  //fire handleSubmit method on submit of the form
+  form.addEventListener("submit", handleSubmit);
+</script>
+{% endblock %}
